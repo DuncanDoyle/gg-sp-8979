@@ -1,0 +1,16 @@
+# Allows the HTTPRoute in grpc-demo to reference a Gloo Upstream in gloo-system.
+# This cross-namespace reference is required for the kubeGateway routing mode used in this reproducer.
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata:
+  name: allow-httproute-to-upstream
+  # ReferenceGrant must live in the namespace of the target resource (gloo-system = namespace of the Upstream)
+  namespace: gloo-system
+spec:
+  from:
+    - group: gateway.networking.k8s.io
+      kind: HTTPRoute
+      namespace: grpc-demo
+  to:
+    - group: gloo.solo.io
+      kind: Upstream

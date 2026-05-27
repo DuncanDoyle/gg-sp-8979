@@ -1,0 +1,24 @@
+# BUG (solo-projects#8979): When protoDescriptorBin is replaced with a corrupt value (see test.sh),
+# the Upstream reports state: Accepted (false positive) instead of state: Error.
+# Envoy then NACKs the RouteConfiguration at ~10 retries/second, blocking all xDS updates.
+#
+# Initial state: valid protoDescriptorBin — healthy baseline before triggering the bug.
+apiVersion: gloo.solo.io/v1
+kind: Upstream
+metadata:
+  name: demo-backend
+  namespace: gloo-system
+spec:
+  kube:
+    serviceName: demo-backend
+    serviceNamespace: grpc-demo
+    servicePort: 8080
+    serviceSpec:
+      grpcJsonTranscoder:
+        convertGrpcStatus: true
+        matchIncomingRequestRoute: true
+        # Valid FileDescriptorSet for demo.v1.DemoService — used to verify healthy baseline.
+        protoDescriptorBin: CrQBChVkZW1vL3YxL3NlcnZpY2UucHJvdG8SB2RlbW8udjEiHAoOR2V0RGF0YVJlcXVlc3QSCgoCaWQYASABKAkiHwoPR2V0RGF0YVJlc3BvbnNlEgwKBGRhdGEYASABKAkySwoLRGVtb1NlcnZpY2USPAoHR2V0RGF0YRIXLmRlbW8udjEuR2V0RGF0YVJlcXVlc3QaGC5kZW1vLnYxLkdldERhdGFSZXNwb25zZWIGcHJvdG8z
+        services:
+          - demo.v1.DemoService
+  useHttp2: true

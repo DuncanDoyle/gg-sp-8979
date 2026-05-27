@@ -1,0 +1,46 @@
+gloo:
+  kubeGateway:
+    # Enable Kubernetes Gateway API integration — this is the mode affected by the bug
+    enabled: true
+  gatewayProxies:
+    gatewayProxy:
+      # Disable the classic Edge-style proxy; this reproducer uses HTTPRoute only
+      disabled: true
+  gateway:
+    validation:
+      allowWarnings: true
+      alwaysAcceptResources: false
+  gloo:
+    logLevel: info
+    disableLeaderElection: true
+    deployment:
+      replicas: 1
+      livenessProbeEnabled: true
+      stats:
+        enabled: "true"
+  discovery:
+    enabled: false
+
+observability:
+  enabled: false
+
+prometheus:
+  enabled: false
+
+grafana:
+  defaultInstallationEnabled: false
+
+gloo-fed:
+  enabled: false
+  glooFedApiserver:
+    enable: false
+
+gateway-portal-web-server:
+  enabled: false
+
+global:
+  extensions:
+    rateLimit:
+      enabled: false
+    extAuth:
+      enabled: false
