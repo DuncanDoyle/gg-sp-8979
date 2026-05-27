@@ -4,12 +4,19 @@ gloo:
     enabled: true
   gatewayProxies:
     gatewayProxy:
-      # Disable the classic Edge-style proxy; this reproducer uses HTTPRoute only
-      disabled: true
+      disabled: false
+      gatewaySettings:
+        # Don't auto-generate Edge Gateway CRs; we deploy gateways/gateway-proxy.yaml explicitly
+        disableGeneratedGateways: true
+      service:
+        # Use port 81 to avoid conflict with the K8S Gateway API proxy on port 80
+        httpPort: 81
+        type: LoadBalancer
   gateway:
     validation:
-      allowWarnings: true
+      allowWarnings: false
       alwaysAcceptResources: false
+      fullEnvoyValidation: true
   gloo:
     logLevel: info
     disableLeaderElection: true

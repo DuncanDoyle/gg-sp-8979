@@ -1,0 +1,24 @@
+# Gloo Edge API equivalent of routes/demo-backend-httproute.yaml.
+# Routes all traffic to the demo-backend Upstream via the classic gateway-proxy.
+#
+# Per the issue report: fullEnvoyValidation: true + alwaysAccept: false DOES block a corrupt
+# protoDescriptorBin when routing via VirtualService, but NOT when routing via HTTPRoute.
+# Applying upstreams/demo-backend-upstream-corrupt.yaml while this VirtualService is active
+# should therefore result in status.state: Error on the Upstream (correct behavior).
+apiVersion: gateway.solo.io/v1
+kind: VirtualService
+metadata:
+  name: demo-backend
+  namespace: gloo-system
+spec:
+  virtualHost:
+    domains:
+      - '*'
+    routes:
+      - matchers:
+          - prefix: /
+        routeAction:
+          single:
+            upstream:
+              name: demo-backend
+              namespace: gloo-system

@@ -57,11 +57,32 @@ cd ..
 
 The test script:
 - Verifies the healthy baseline (valid `protoDescriptorBin`, `insync=1`, no NACK)
-- Patches the Upstream to a corrupt descriptor
+- Applies the corrupt Upstream (`upstreams/demo-backend-upstream-corrupt.yaml`)
 - Shows that `status.state` still reads `Accepted` (the bug)
 - Waits and then shows proxy log flooding and the NACK metric
 
+**4. (Optional) Verify the contrast with the Gloo Edge API**
+
+With `fullEnvoyValidation: true`, the validating webhook *does* correctly block a corrupt `protoDescriptorBin` when a `VirtualService` routes to the Upstream. Deploy the Edge API resources to verify:
+
+```sh
+cd install
+./setup-edge-api.sh
+```
+
+Then apply the corrupt Upstream:
+
+```sh
+kubectl apply -f upstreams/demo-backend-upstream-corrupt.yaml
+```
+
+Expected: the webhook rejects the apply and `status.state` is set to `Error`.
+
+> **Important**: run `setup-edge-api.sh` only *after* reproducing the bug via the HTTPRoute path. With a VirtualService in place, the webhook will block the corrupt Upstream, preventing the NACK cascade — and the bug will not trigger.
+
 ## Resource Overview
+
+**K8S Gateway API (main bug path)**
 
 | Resource | Namespace | Purpose |
 |---|---|---|
@@ -70,3 +91,10 @@ The test script:
 | `Upstream` (demo-backend) | gloo-system | grpcJsonTranscoder config — corrupt `protoDescriptorBin` triggers the NACK |
 | `ReferenceGrant` | gloo-system | Allows the HTTPRoute in grpc-demo to reference the Upstream in gloo-system |
 | `HTTPRoute` (demo-backend-route) | grpc-demo | Routes all traffic to the Upstream |
+
+**Gloo Edge API (contrast path, `setup-edge-api.sh`)**
+
+| Resource | Namespace | Purpose |
+|---|---|---|
+| `Gateway` (gateway-proxy) | gloo-system | Classic Edge gateway listener on port 81 |
+| `VirtualService` (demo-backend) | gloo-system | Routes all traffic to the same Upstream — webhook blocks the corrupt descriptor here |
