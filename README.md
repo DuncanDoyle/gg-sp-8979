@@ -1,7 +1,6 @@
 # Reproducer: grpcjson plugin passes invalid protoDescriptorBin to Envoy (solo-projects#8979)
 
 **Issue**: https://github.com/solo-io/solo-projects/issues/8979
-**Zendesk**: https://solo-io.zendesk.com/agent/tickets/8826
 **Version**: Gloo Gateway Enterprise 1.20.5
 
 ## Bug Summary
