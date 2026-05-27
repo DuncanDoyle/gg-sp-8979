@@ -1,0 +1,27 @@
+# Corrupt Upstream — triggers the NACK cascade described in solo-projects#8979.
+# Apply this to replace the valid Upstream and reproduce the bug:
+#
+#   kubectl apply -f upstreams/demo-backend-upstream-corrupt.yaml
+#
+# Expected after apply: status.state = Error
+# Actual (bug):         status.state = Accepted (false positive)
+#                       Envoy floods logs with "transcoding_filter: Unable to parse proto descriptor"
+apiVersion: gloo.solo.io/v1
+kind: Upstream
+metadata:
+  name: demo-backend
+  namespace: gloo-system
+spec:
+  kube:
+    serviceName: demo-backend
+    serviceNamespace: grpc-demo
+    servicePort: 8080
+    serviceSpec:
+      grpcJsonTranscoder:
+        convertGrpcStatus: true
+        matchIncomingRequestRoute: true
+        # base64("this is not a valid proto descriptor") — not a valid FileDescriptorSet
+        protoDescriptorBin: dGhpcyBpcyBub3QgYSB2YWxpZCBwcm90byBkZXNjcmlwdG9y
+        services:
+          - demo.v1.DemoService
+  useHttp2: true

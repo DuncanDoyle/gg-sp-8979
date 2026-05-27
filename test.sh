@@ -34,12 +34,8 @@ kubectl exec -n gloo-system "$GLOO_POD" -- \
 # ---------------------------------------------------------------------------
 # Step 2 — Inject corrupt descriptor
 # ---------------------------------------------------------------------------
-printf "\n=== Step 2: Patch Upstream with corrupt protoDescriptorBin ===\n"
-# base64("this is not a valid proto descriptor")
-kubectl patch upstream demo-backend -n gloo-system --type merge -p '{
-  "spec":{"kube":{"serviceSpec":{"grpcJsonTranscoder":{
-    "protoDescriptorBin":"dGhpcyBpcyBub3QgYSB2YWxpZCBwcm90byBkZXNjcmlwdG9y"
-  }}}}}'
+printf "\n=== Step 2: Apply Upstream with corrupt protoDescriptorBin ===\n"
+kubectl apply -f upstreams/demo-backend-upstream-corrupt.yaml
 
 # ---------------------------------------------------------------------------
 # Step 3 — Upstream status: false positive
